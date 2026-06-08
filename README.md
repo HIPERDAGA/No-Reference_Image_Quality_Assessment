@@ -1,138 +1,104 @@
-# BRISQUE Step-by-Step Image Quality Assessment
+# No-Reference Image Quality Assessment
 
-This repository contains a Google Colab notebook that explains and implements the step-by-step process of the **BRISQUE** no-reference image quality assessment metric.
+This repository contains three Google Colab notebooks for understanding and visualizing **No-Reference Image Quality Assessment (NR-IQA)** metrics.
 
-BRISQUE stands for **Blind/Referenceless Image Spatial Quality Evaluator**. It is a no-reference image quality metric based on **Natural Scene Statistics (NSS)** in the spatial domain. Unlike full-reference methods, BRISQUE does not require a pristine reference image to estimate perceptual quality.
+The repository focuses on three widely used NR-IQA approaches:
 
-The notebook allows users to upload an image from their computer and visualize each stage of the BRISQUE feature extraction process until obtaining the final BRISQUE quality score.
+- **BRISQUE**: Blind/Referenceless Image Spatial Quality Evaluator.
+- **NIQE**: Natural Image Quality Evaluator.
+- **PIQE**: Perception-based Image Quality Evaluator.
 
----
-
-## Open in Google Colab
-
-Replace `USER` and `REPOSITORY` with your GitHub username and repository name:
-
-```markdown
-[Open in Colab](https://colab.research.google.com/github/USER/REPOSITORY/blob/main/BRISQUE_step_by_step_Colab.ipynb)
-```
+These methods estimate image quality **without requiring a reference or pristine image**, which makes them useful for real-world computer vision applications where the original image is not available.
 
 ---
 
-## Repository contents
+## Repository purpose
+
+The main goal of this repository is to provide educational, step-by-step notebooks that allow users to:
+
+1. Upload an image from their computer.
+2. Visualize the preprocessing steps.
+3. Understand how each metric analyzes the image.
+4. Display intermediate maps, histograms, blocks, or feature representations.
+5. Compute the final image quality score.
+
+This repository is useful for students, researchers, and developers working on image preprocessing, computer vision, object detection, adverse weather image analysis, and no-reference image quality assessment.
+
+---
+
+## Repository structure
 
 ```text
-.
-├── BRISQUE_step_by_step_Colab.ipynb
-├── README.md
-└── figures/
+No-Reference_Image_Quality_Assessment/
+│
+├── BRISQUE_step_by_step_Colab (1).ipynb
+├── NIQE_step_by_step_Colab (1).ipynb
+├── PIQE_step_by_step_Colab (1).ipynb
+└── README.md
 ```
 
-The main file is:
-
-```text
-BRISQUE_step_by_step_Colab.ipynb
-```
-
-This notebook performs the complete BRISQUE workflow and displays the intermediate images, maps, histograms, features, and final quality score.
+> If you rename the notebooks, update the links in this README accordingly.
 
 ---
 
-## Main objective
+## Open notebooks in Google Colab
 
-The objective of this notebook is to provide a clear and visual explanation of how BRISQUE estimates image quality without using a reference image.
+### BRISQUE notebook
 
-The notebook shows how an input image is transformed into statistical features based on natural image behavior. These features are then used to estimate the perceptual quality of the image.
+[Open BRISQUE in Colab](https://colab.research.google.com/github/HIPERDAGA/No-Reference_Image_Quality_Assessment/blob/main/BRISQUE_step_by_step_Colab%20%281%29.ipynb)
+
+### NIQE notebook
+
+[Open NIQE in Colab](https://colab.research.google.com/github/HIPERDAGA/No-Reference_Image_Quality_Assessment/blob/main/NIQE_step_by_step_Colab%20%281%29.ipynb)
+
+### PIQE notebook
+
+[Open PIQE in Colab](https://colab.research.google.com/github/HIPERDAGA/No-Reference_Image_Quality_Assessment/blob/main/PIQE_step_by_step_Colab%20%281%29.ipynb)
 
 ---
 
-## BRISQUE workflow
+## Notebook 1: BRISQUE step by step
 
-The complete process can be summarized as follows:
+**File:** `BRISQUE_step_by_step_Colab (1).ipynb`
+
+BRISQUE stands for **Blind/Referenceless Image Spatial Quality Evaluator**. It is a no-reference image quality metric based on **Natural Scene Statistics (NSS)** in the spatial domain.
+
+Unlike methods that transform the image into another domain, such as wavelet or DCT, BRISQUE works directly with spatial luminance information.
+
+### What this notebook does
+
+The BRISQUE notebook performs the following steps:
+
+1. Uploads an image from the local computer.
+2. Converts the image to grayscale/luminance.
+3. Computes **Mean Subtracted Contrast Normalized (MSCN)** coefficients.
+4. Displays the local mean, local standard deviation, and MSCN map.
+5. Fits a **Generalized Gaussian Distribution (GGD)** to the MSCN coefficients.
+6. Computes pairwise products of neighboring MSCN coefficients in four directions:
+   - Horizontal
+   - Vertical
+   - Main diagonal
+   - Secondary diagonal
+7. Extracts **Asymmetric Generalized Gaussian Distribution (AGGD)** features.
+8. Repeats the feature extraction process at two image scales.
+9. Builds the 36-dimensional BRISQUE feature vector.
+10. Computes the final BRISQUE score using a pretrained model.
+
+### BRISQUE workflow
 
 ```text
 Image
-→ Grayscale conversion
+→ Grayscale
 → MSCN coefficients
-→ GGD feature extraction
+→ GGD features
 → Pairwise products
-→ AGGD feature extraction
-→ Two-scale feature extraction
-→ 36-dimensional feature vector
+→ AGGD features
+→ Two-scale feature vector
 → Regression model
-→ Final BRISQUE score
+→ BRISQUE score
 ```
 
----
-
-## What the notebook does
-
-The notebook includes the following steps:
-
-1. Upload an image from the local computer.
-2. Display the original input image.
-3. Convert the image to grayscale/luminance.
-4. Compute **Mean Subtracted Contrast Normalized (MSCN)** coefficients.
-5. Display the local mean, local standard deviation, and MSCN map.
-6. Fit a **Generalized Gaussian Distribution (GGD)** to the MSCN coefficients.
-7. Plot the MSCN histogram and the fitted GGD curve.
-8. Compute pairwise products of neighboring MSCN coefficients in four directions:
-
-   * Horizontal
-   * Vertical
-   * Main diagonal
-   * Secondary diagonal
-9. Extract **AGGD** statistical features from the pairwise products.
-10. Repeat the process at two image scales.
-11. Generate the final **36-dimensional BRISQUE feature vector**.
-12. Compute the final BRISQUE score using OpenCV's pretrained BRISQUE model.
-
----
-
-## MSCN coefficients
-
-One of the most important preprocessing steps in BRISQUE is the computation of MSCN coefficients:
-
-```latex
-\hat{I}(i,j)=\frac{I(i,j)-\mu(i,j)}{\sigma(i,j)+C}
-```
-
-where:
-
-* `I(i,j)` is the luminance value of the pixel.
-* `μ(i,j)` is the local mean.
-* `σ(i,j)` is the local standard deviation.
-* `C` is a constant used to avoid division by zero.
-
-This normalization reduces local luminance and contrast variations, making it easier to analyze the statistical regularities of the image.
-
----
-
-## BRISQUE features
-
-BRISQUE extracts statistical features from:
-
-1. The distribution of MSCN coefficients.
-2. The pairwise products of neighboring MSCN coefficients.
-
-At one image scale, BRISQUE extracts:
-
-```text
-2 GGD features + 16 AGGD features = 18 features
-```
-
-Since the process is repeated at two scales:
-
-```text
-18 features × 2 scales = 36 features
-```
-
-These 36 features are used by a trained regression model to estimate the perceptual quality score.
-
----
-
-## BRISQUE score interpretation
-
-The final output is a BRISQUE score.
+### Score interpretation
 
 In general:
 
@@ -141,69 +107,200 @@ Lower BRISQUE score  → better perceptual image quality
 Higher BRISQUE score → stronger perceptual degradation
 ```
 
-Approximate interpretation:
+---
 
-| BRISQUE score | Interpretation             |
-| ------------- | -------------------------- |
-| 0 – 20        | Very good quality          |
-| 20 – 40       | Good or acceptable quality |
-| 40 – 60       | Moderate degradation       |
-| 60 – 100      | Strong degradation         |
+## Notebook 2: NIQE step by step
 
-These ranges are approximate and may vary depending on the dataset, image content, and environmental conditions.
+**File:** `NIQE_step_by_step_Colab (1).ipynb`
+
+NIQE stands for **Natural Image Quality Evaluator**. It is a no-reference and opinion-unaware image quality metric.
+
+Unlike BRISQUE, NIQE does not require training on human opinion scores from distorted images. Instead, it compares the statistical features of the test image with a statistical model built from natural, undistorted images.
+
+### What this notebook does
+
+The NIQE notebook performs the following steps:
+
+1. Uploads an image from the local computer.
+2. Converts the image to grayscale/luminance.
+3. Computes MSCN coefficients.
+4. Displays the MSCN map and histogram.
+5. Divides the image into local patches.
+6. Selects spatially active patches.
+7. Extracts Natural Scene Statistics features from selected patches.
+8. Builds a test-image **Multivariate Gaussian (MVG)** model.
+9. Compares the test-image model with a natural-image model.
+10. Computes the final NIQE score.
+
+### NIQE workflow
+
+```text
+Image
+→ Grayscale
+→ MSCN coefficients
+→ Patch selection
+→ NSS feature extraction
+→ Multivariate Gaussian model
+→ Distance from natural-image model
+→ NIQE score
+```
+
+### Score interpretation
+
+In general:
+
+```text
+Lower NIQE score  → better natural perceptual quality
+Higher NIQE score → stronger deviation from natural image statistics
+```
+
+NIQE is especially useful when the goal is to evaluate how much an image deviates from the statistical behavior of natural images.
+
+---
+
+## Notebook 3: PIQE step by step
+
+**File:** `PIQE_step_by_step_Colab (1).ipynb`
+
+PIQE stands for **Perception-based Image Quality Evaluator**. In the original paper, it also appears as **PIQUE**.
+
+PIQE is a no-reference image quality metric that works at the local block level. It estimates image quality by analyzing perceptually important regions and generating a distortion map.
+
+### What this notebook does
+
+The PIQE notebook performs the following steps:
+
+1. Uploads an image from the local computer.
+2. Converts the image to grayscale/luminance.
+3. Computes MSCN coefficients.
+4. Divides the image into non-overlapping **16 × 16 blocks**.
+5. Classifies blocks as:
+   - Uniform blocks
+   - Spatially active blocks
+6. Applies the noticeable distortion criterion.
+7. Applies the noise criterion.
+8. Assigns local distortion scores to affected blocks.
+9. Generates a block-level distortion map.
+10. Pools the local scores to compute the final PIQE score.
+
+### PIQE workflow
+
+```text
+Image
+→ Grayscale
+→ MSCN coefficients
+→ 16 × 16 blocks
+→ Spatial activity detection
+→ Distortion detection
+→ Distortion map
+→ PIQE score
+```
+
+### Score interpretation
+
+The PIQE score is commonly interpreted as:
+
+```text
+Lower PIQE score  → better perceptual image quality
+Higher PIQE score → stronger perceptual degradation
+```
+
+In this repository, the score may be displayed both in the original range from **0 to 1** and in a scaled range from **0 to 100**.
+
+---
+
+## Comparison of the three notebooks
+
+| Metric | Full name | Main idea | Uses reference image? | Main output |
+|---|---|---|---|---|
+| BRISQUE | Blind/Referenceless Image Spatial Quality Evaluator | Uses NSS features from MSCN coefficients and pairwise products | No | BRISQUE score |
+| NIQE | Natural Image Quality Evaluator | Compares image statistics with a natural-image model | No | NIQE score |
+| PIQE | Perception-based Image Quality Evaluator | Detects local distortions in spatially active blocks | No | PIQE score and distortion map |
+
+---
+
+## Main concepts covered
+
+This repository introduces and visualizes the following concepts:
+
+- No-reference image quality assessment
+- Natural Scene Statistics
+- MSCN coefficients
+- Local mean and local standard deviation
+- GGD modeling
+- AGGD modeling
+- Pairwise product distributions
+- Multiscale feature extraction
+- Patch-level analysis
+- Spatially active blocks
+- Distortion maps
+- BRISQUE, NIQE, and PIQE scores
 
 ---
 
 ## Requirements
 
-The notebook installs the required packages automatically in Google Colab:
+The notebooks are designed to run in **Google Colab**, so no local installation is required.
 
-```python
+The notebooks install the required Python packages automatically when executed. The main libraries used include:
+
+```text
+opencv-python-headless
 opencv-contrib-python-headless
+numpy
 scipy
-scikit-image
 pandas
 matplotlib
-numpy
+pillow
+torch
+pyiqa
 ```
 
-No local installation is required if the notebook is executed in Google Colab.
+---
+
+## How to use this repository
+
+1. Open one of the notebooks in Google Colab.
+2. Run the installation/import cell.
+3. Upload an image from your computer when prompted.
+4. Execute the cells in order.
+5. Observe the intermediate results:
+   - Grayscale image
+   - MSCN map
+   - Histograms
+   - Patch or block maps
+   - Feature values
+   - Distortion maps
+6. Review the final quality score.
 
 ---
 
-## How to use
+## Suggested use cases
 
-1. Open the notebook in Google Colab.
-2. Run the first cell to install the dependencies.
-3. Upload an image from your computer.
-4. Run the notebook cells in order.
-5. Review the intermediate visualizations:
+This repository can be used for:
 
-   * Grayscale image
-   * MSCN map
-   * GGD histogram
-   * Pairwise product maps
-   * AGGD features
-   * 36-feature vector
-6. Check the final BRISQUE score.
+- Academic explanation of no-reference image quality metrics.
+- Research on image preprocessing.
+- Image quality analysis under adverse conditions.
+- Computer vision pipelines.
+- Object detection preprocessing evaluation.
+- Comparison between original and enhanced images.
+- Teaching BRISQUE, NIQE, and PIQE step by step.
 
 ---
 
-## Applications
+## Notes
 
-This notebook can be useful for:
-
-* Understanding no-reference image quality assessment.
-* Explaining BRISQUE in academic projects.
-* Evaluating image degradation without a reference image.
-* Comparing image quality before and after preprocessing.
-* Supporting computer vision pipelines under adverse conditions such as fog, rain, sandstorm, blur, noise, or low illumination.
+- These notebooks are intended for educational and research purposes.
+- The scores should be interpreted carefully, since image content, resolution, lighting, and environmental conditions can affect the results.
+- Lower scores usually indicate better quality, but exact thresholds may vary depending on the metric and dataset.
+- BRISQUE, NIQE, and PIQE are not equivalent metrics; each one evaluates image quality using a different strategy.
 
 ---
 
-## Reference
+## References
 
-The BRISQUE method is based on the following paper:
+The theoretical basis of the notebooks comes from the following works:
 
 ```bibtex
 @article{mittal2012brisque,
@@ -216,11 +313,31 @@ The BRISQUE method is based on the following paper:
   year    = {2012},
   doi     = {10.1109/TIP.2012.2214050}
 }
+
+@article{mittal2013niqe,
+  author  = {Mittal, Anish and Soundararajan, Rajiv and Bovik, Alan C.},
+  title   = {Making a Completely Blind Image Quality Analyzer},
+  journal = {IEEE Signal Processing Letters},
+  volume  = {20},
+  number  = {3},
+  pages   = {209--212},
+  year    = {2013},
+  doi     = {10.1109/LSP.2012.2227726}
+}
+
+@inproceedings{venkatanath2015pique,
+  author    = {Venkatanath, N. and Praneeth, D. and Maruthi Chandrasekhar, Bh. and Channappayya, Sumohana S. and Medasani, Swarup S.},
+  title     = {Blind Image Quality Evaluation Using Perception Based Features},
+  booktitle = {2015 Twenty First National Conference on Communications},
+  pages     = {1--6},
+  year      = {2015},
+  doi       = {10.1109/NCC.2015.7084843}
+}
 ```
 
 ---
 
 ## License
 
-This repository is intended for academic and educational purposes.
-You may adapt and extend the notebook according to your research needs.
+This repository is intended for academic and educational purposes.  
+You may adapt, modify, and extend the notebooks according to your research needs.
